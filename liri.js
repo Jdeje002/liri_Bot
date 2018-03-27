@@ -19,7 +19,7 @@ switch (command) {
   case 'my-tweets':
     my_tweets()
     break;
-  case 'spotify-this-song':
+  case 'find-this-song':
     //
     spotify_this_song()
     break;
@@ -43,10 +43,19 @@ function my_tweets() {
         console.log("Date: " + tweets[i].created_at);
         console.log("Tweet: " + tweets[i].text);
         console.log("======================")
+        fs.appendFile('log.txt', "Tweet: " + tweets[i].text+", " ,function(e){
+          if(e){
+              console.log(e)
+          } else{
+              console.log('append')
+          }
+      })
       }
     }
 
+
   });
+  
 }
 
 
@@ -76,7 +85,16 @@ function spotify_this_song() {
     console.log("Album: " + spotifyResponse[0].album.name)
 
     console.log("======================")
-
+    
+    fs.appendFile('log.txt', "Artist: " + spotifyResponse[0].artists[0].name+ ", " ,function(e){
+      if(e){
+          console.log(e)
+      } else{
+          console.log('append')
+      }
+    
+  })
+    
   })
 }
 
@@ -84,7 +102,6 @@ function spotify_this_song() {
 
 
 function movie_this() {
-  console.log("hi")
   var movieSearch = process.argv[3];
 
   var queryUrl = "http://www.omdbapi.com/?t=" + movieSearch + "&s=&y=&plot=short&apikey=trilogy";
@@ -104,17 +121,32 @@ function movie_this() {
         "Actors: " + movieObject.Actors + " , " +
         "Plot: " + movieObject.Plot
       )
-
+      
     }
+    fs.appendFile('log.txt', "Title: " + movieObject.Title + ", " ,function(e){
+      if(e){
+          console.log(e)
+      } else{
+          console.log('append')
+      }
+    
+  })
   })
 }
 
 function do_what_it_says() {
-  console.log("hi")
+  
 
   var fs = require('fs')
 
   fs.readFile('random.txt','utf8', function(err,data) {
+    if (err){
+        console.log(err)
+    }else {
+        console.log(data)
+    }
+  })
+  fs.readFile('log.txt','utf8', function(err,data) {
     if (err){
         console.log(err)
     }else {
