@@ -7,131 +7,196 @@ var twitter = require('twitter');
 var request = require('request');
 var spotify = require('node-spotify-api');
 var keys = require('./keys.js')
+var inquirer = require('inquirer');
 
 var spotify = new spotify(keys.spotify);
 var client = new twitter(keys.twitter);
 
+
+// inquirer 
+var pmpt = inquirer.createPromptModule()
+var qs = [{
+    type:"list",
+    name:"command",
+    message:"Please pick an option.",
+    choices: ['tweets','music','movies','log']
+}]
+
+pmpt(qs).then(answers => {
+  console.log(answers.command);
+  switch (answers.command) {
+    case 'tweets':
+      my_tweets()
+      break;
+    case 'music':
+      //
+      spotify_this_song()
+      break;
+    case 'movies':
+      //
+      movie_this()
+      break;
+    case 'log':
+      do_what_it_says()
+      break;
+  }
+});
+
+
+
+2
 //Liri command
 
 var command = process.argv[2]
+var user = process.argv[3]
 
-switch (command) {
-  case 'my-tweets':
-    my_tweets()
-    break;
-  case 'find-this-song':
-    //
-    spotify_this_song()
-    break;
-  case 'movie-this':
-    //
-    movie_this()
-    break;
-  case 'do-what-it-says':
-    do_what_it_says()
-    break;
-}
+// switch (command) {
+//   case 'my-tweet':
+//     my_tweets()
+//     break;
+//   case 'find-this-song':
+//     //
+//     spotify_this_song()
+//     break;
+//   case 'movie-this':
+//     //
+//     movie_this()
+//     break;
+//   case 'do-what-it-says':
+//     do_what_it_says()
+//     break;
+// }
 
 function my_tweets() {
+ var user = process.argv[3]
+ 
+ var questions = [
+  {
+    type: 'input',
+    name: 'tweet',
+    message: "Who do you want to search"
+  }] 
 
-
-  var params = { screen_name: 'johndejesus201', count: 10 };
-
-  client.get('statuses/user_timeline', params, function (error, tweets, response) {
-    for (var i = 0; i < tweets.length; i++) {
-      if (!error) {
-        console.log("Date: " + tweets[i].created_at);
-        console.log("Tweet: " + tweets[i].text);
-        console.log("======================")
-        fs.appendFile('log.txt', "Tweet: " + tweets[i].text+", " ,function(e){
-          if(e){
-              console.log(e)
-          } else{
-              console.log('append')
-          }
-      })
+  pmpt(questions).then (answers => {
+    var params = { screen_name: answers.tweet, count: 10 };
+    console.log(answers.tweet)
+    client.get('statuses/user_timeline', params, function (error, tweets, response) {
+      for (var i = 0; i < tweets.length; i++) {
+        if (!error) {
+          console.log("Date: " + tweets[i].created_at);
+          console.log("Tweet: " + tweets[i].text);
+          console.log("======================")
+          fs.appendFile('log.txt', "Tweet: " + tweets[i].text+", " ,function(e){
+            if(e){
+                console.log(e)
+            } else{
+                console.log('append')
+            }
+        })
+        }
       }
-    }
-
-
+  
+  
+    });
   });
+
+  
+
+  
   
 }
 
 
 function spotify_this_song() {
-  if (songRequest === undefined) {
-    songRequest = "Bye Bye Bye"
-  }
+ 
 
-  var songRequest = process.argv[3];
-
-  spotify.search({ type: 'track', query: songRequest }, function (err, data) {
-
-    if (err) {
-      console.log('Error occurred: ' + err);
-      return;
-    }
-    var spotifyResponse = data.tracks.items;
-
-    console.log("======================")
-    //Artist Name
-    console.log("Artist: " + spotifyResponse[0].artists[0].name)
-    //Song Name
-    console.log("Song: " + spotifyResponse[0].name)
-    //Song Link
-    console.log("Link: " + spotifyResponse[0].album.external_urls.spotify)
-    //Album Name
-    console.log("Album: " + spotifyResponse[0].album.name)
-
-    console.log("======================")
+  var questions = [
+    {
+      type: 'input',
+      name: 'song',
+      message: "Who do you want to search"
+    }] 
+  
+  pmpt(questions).then(answers => {
     
-    fs.appendFile('log.txt', "Artist: " + spotifyResponse[0].artists[0].name+ ", " ,function(e){
-      if(e){
-          console.log(e)
-      } else{
-          console.log('append')
+    spotify.search({ type: 'track', query: answers.song }, function (err, data) {
+
+      if (err) {
+        console.log('Error occurred: ' + err);
+        return;
       }
-    
+      var spotifyResponse = data.tracks.items;
+  
+      console.log("======================")
+      //Artist Name
+      console.log("Artist: " + spotifyResponse[0].artists[0].name)
+      //Song Name
+      console.log("Song: " + spotifyResponse[0].name)
+      //Song Link
+      console.log("Link: " + spotifyResponse[0].album.external_urls.spotify)
+      //Album Name
+      console.log("Album: " + spotifyResponse[0].album.name)
+  
+      console.log("======================")
+      
+      fs.appendFile('log.txt', "Artist: " + spotifyResponse[0].artists[0].name+ ", " ,function(e){
+        if(e){
+            console.log(e)
+        } else{
+            console.log('append')
+        }
+      
+    })
+      
+    })
   })
-    
-  })
+  
 }
 
 
 
 
 function movie_this() {
-  var movieSearch = process.argv[3];
+  var questions = [
+    {
+      type: 'input',
+      name: 'movies',
+      message: "Who do you want to search"
+    }] 
 
-  var queryUrl = "http://www.omdbapi.com/?t=" + movieSearch + "&s=&y=&plot=short&apikey=trilogy";
-
-  if (!movieSearch) {
-    movieSearch = "Dumb and Dumber "
-  }
-
-  request(queryUrl, function (error, response, body) {
-    if (error) { console.log(error) }
-    if (response.statusCode === 200) {
-      var movieObject = JSON.parse(body);
-      console.log(
-        "Title: " + movieObject.Title + " , " +
-        "Year: " + movieObject.Year + " , " +
-        "Rating: " + movieObject.imdbRating + " , " +
-        "Actors: " + movieObject.Actors + " , " +
-        "Plot: " + movieObject.Plot
-      )
-      
-    }
-    fs.appendFile('log.txt', "Title: " + movieObject.Title + ", " ,function(e){
-      if(e){
-          console.log(e)
-      } else{
-          console.log('append')
-      }
+    pmpt(questions).then(answers =>{
+     
+      var queryUrl = "http://www.omdbapi.com/?t=" + answers.movies + "&s=&y=&plot=short&apikey=trilogy";
+  
+  
+      // if (!movieSearch) {
+      //   movieSearch = "Dumb and Dumber "
+      // }
     
-  })
-  })
+      request(queryUrl, function (error, response, body) {
+        if (error) { console.log(error) }
+        if (response.statusCode === 200) {
+          var movieObject = JSON.parse(body);
+          console.log(
+            "Title: " + movieObject.Title + " , " +
+            "Year: " + movieObject.Year + " , " +
+            "Rating: " + movieObject.imdbRating + " , " +
+            "Actors: " + movieObject.Actors + " , " +
+            "Plot: " + movieObject.Plot
+          )
+          
+        }
+        fs.appendFile('log.txt', "Title: " + movieObject.Title + ", " ,function(e){
+          if(e){
+              console.log(e)
+          } else{
+              console.log('append')
+          }
+        
+      })
+      })
+    })
+  
 }
 
 function do_what_it_says() {
