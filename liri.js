@@ -23,7 +23,6 @@ var qs = [{
 }]
 
 pmpt(qs).then(answers => {
-  console.log(answers.command);
   switch (answers.command) {
     case 'tweets':
       my_tweets()
@@ -44,28 +43,6 @@ pmpt(qs).then(answers => {
 
 
 
-2
-//Liri command
-
-var command = process.argv[2]
-var user = process.argv[3]
-
-// switch (command) {
-//   case 'my-tweet':
-//     my_tweets()
-//     break;
-//   case 'find-this-song':
-//     //
-//     spotify_this_song()
-//     break;
-//   case 'movie-this':
-//     //
-//     movie_this()
-//     break;
-//   case 'do-what-it-says':
-//     do_what_it_says()
-//     break;
-// }
 
 function my_tweets() {
  var user = process.argv[3]
@@ -83,14 +60,15 @@ function my_tweets() {
     client.get('statuses/user_timeline', params, function (error, tweets, response) {
       for (var i = 0; i < tweets.length; i++) {
         if (!error) {
+          console.log("======================")
           console.log("Date: " + tweets[i].created_at);
           console.log("Tweet: " + tweets[i].text);
           console.log("======================")
-          fs.appendFile('log.txt', "Tweet: " + tweets[i].text+", " ,function(e){
+          fs.appendFile('log.txt', "====================== \n"+"Tweet: " + tweets[i].text+",\n "+"====================== \n" ,function(e){
             if(e){
                 console.log(e)
             } else{
-                console.log('append')
+                console.log('a')
             }
         })
         }
@@ -139,11 +117,11 @@ function spotify_this_song() {
   
       console.log("======================")
       
-      fs.appendFile('log.txt', "Artist: " + spotifyResponse[0].artists[0].name+ ", " ,function(e){
+      fs.appendFile('log.txt', "====================== \n"+"Artist: " + spotifyResponse[0].artists[0].name+ ", \n"+"====================== " ,function(e){
         if(e){
             console.log(e)
         } else{
-            console.log('append')
+            console.log('a')
         }
       
     })
@@ -178,19 +156,21 @@ function movie_this() {
         if (response.statusCode === 200) {
           var movieObject = JSON.parse(body);
           console.log(
+            "======================"+
             "Title: " + movieObject.Title + " , " +
             "Year: " + movieObject.Year + " , " +
             "Rating: " + movieObject.imdbRating + " , " +
             "Actors: " + movieObject.Actors + " , " +
             "Plot: " + movieObject.Plot
+            +"======================"
           )
           
         }
-        fs.appendFile('log.txt', "Title: " + movieObject.Title + ", " ,function(e){
+        fs.appendFile('log.txt', "====================== \n"+"Title: " + movieObject.Title + ",\n " + "Plot: " + movieObject.Plot+",\n "+"====================== \n" ,function(e){
           if(e){
               console.log(e)
           } else{
-              console.log('append')
+              console.log('a')
           }
         
       })
